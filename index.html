@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoMind AI – Intelligent Waste Management System</title>
+  <meta name="description" content="AI-powered waste classification, smart compost management, and sustainable recycling system." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            eco: {
+              bg: '#080C14',
+              card: '#111827',
+              'card-glass': 'rgba(17, 24, 39, 0.75)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              green: '#10B981',
+              'green-bright': '#00FF9D',
+              cyan: '#06B6D4',
+              'cyan-bright': '#00F0FF',
+              blue: '#3B82F6',
+              purple: '#8B5CF6',
+              red: '#EF4444',
+              amber: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          boxShadow: {
+            'glow-green': '0 0 25px -5px rgba(0, 255, 157, 0.4)',
+            'glow-cyan': '0 0 25px -5px rgba(0, 240, 255, 0.4)',
+            'glow-red': '0 0 25px -5px rgba(239, 68, 68, 0.5)',
+            'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.5)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- React 18 & Babel Standalone CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      background-color: #080c14;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .cyber-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .glass-panel-glow {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 157, 0.3);
+      box-shadow: 0 0 30px rgba(0, 255, 157, 0.15);
+    }
+
+    .glass-panel-glow-red {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.15);
+    }
+
+    .text-gradient-green {
+      background: linear-gradient(135deg, #00FF9D 0%, #10B981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-nvidia {
+      background: linear-gradient(135deg, #76B900 0%, #00FF9D 50%, #00F0FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @keyframes scan {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+
+    .animate-scan {
+      position: absolute;
+      animation: scan 2.5s linear infinite;
+    }
+
+    @keyframes flyToCompost {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+      50% { transform: translate(-120px, -40px) scale(0.8) rotate(-180deg); opacity: 0.8; }
+      100% { transform: translate(-200px, 80px) scale(0.2) rotate(-360deg); opacity: 0; }
+    }
+
+    @keyframes flyToReject {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+      50% { transform: translate(120px, -40px) scale(0.8) rotate(180deg); opacity: 0.8; }
+      100% { transform: translate(200px, 80px) scale(0.2) rotate(360deg); opacity: 0; }
+    }
+
+    .animate-fly-compost {
+      animation: flyToCompost 1.4s ease-in-out forwards;
+    }
+
+    .animate-fly-reject {
+      animation: flyToReject 1.4s ease-in-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-eco-bg text-gray-100 font-sans antialiased selection:bg-eco-green/30 selection:text-eco-green-bright min-h-screen">
+  
+  <div id="root"></div>
+
+  <!-- Single File React App Script -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- PRESET DATA ---
+    const PRESET_ITEMS = [
+      {
+        id: 'banana-peel',
+        name: 'Banana Peel',
+        icon: '🍌',
+        image: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?w=600&auto=format&fit=crop&q=80',
+        category: 'Organic Waste',
+        decision: 'Compost',
+        confidence: 99.2,
+        reason: 'Organic biodegradable fruit matter.',
+        disposal: 'Direct to Smart Compost Chamber for 5-day aerobic breakdown.'
+      },
+      {
+        id: 'book',
+        name: 'Book',
+        icon: '📚',
+        image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80',
+        category: 'Paper Waste',
+        decision: 'Reject',
+        confidence: 98.7,
+        reason: 'Contains glue and ink.',
+        disposal: 'Paper Recycling.'
+      },
+      {
+        id: 'plastic-bottle',
+        name: 'Plastic Bottle',
+        icon: '🍼',
+        image: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?w=600&auto=format&fit=crop&q=80',
+        category: 'Plastic Waste',
+        decision: 'Reject',
+        confidence: 99.5,
+        reason: 'Non-biodegradable plastic.',
+        disposal: 'Plastic Recycling Bin.'
+      },
+      {
+        id: 'apple-core',
+        name: 'Apple Core',
+        icon: '🍎',
+        image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&auto=format&fit=crop&q=80',
+        category: 'Organic Waste',
+        decision: 'Compost',
+        confidence: 98.9,
+        reason: 'Organic biodegradable waste.',
+        disposal: 'Smart Compost Chamber.'
+      },
+      {
+        id: 'soda-can',
+        name: 'Soda Can',
+        icon: '🥤',
+        image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&auto=format&fit=crop&q=80',
+        category: 'Metal Waste',
+        decision: 'Reject',
+        confidence: 99.1,
+        reason: 'Non-biodegradable metallic alloy.',
+        disposal: 'Metal Recycling.'
+      }
+    ];
+
+    // --- NAVIGATION COMPONENT ---
+    function Navbar({ activePage, setActivePage }) {
+      const [mobileOpen, setMobileOpen] = useState(false);
+
+      const navItems = [
+        { id: 'home', label: 'Home', icon: 'home' },
+        { id: 'detection', label: 'AI Detection', icon: 'cpu' },
+        { id: 'control', label: 'Smart Compost Control', icon: 'sliders' },
+        { id: 'dashboard', label: 'Dashboard', icon: 'bar-chart-2' },
+        { id: 'about', label: 'About', icon: 'info' },
+        { id: 'contact', label: 'Contact', icon: 'mail' },
+      ];
+
+      return (
+        <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-eco-bg/80 border-b border-eco-border shadow-glass">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <div onClick={() => setActivePage('home')} className="flex items-center gap-3 cursor-pointer group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-eco-green to-eco-cyan p-[2px] shadow-glow-green">
+                <div className="w-full h-full bg-eco-bg rounded-[10px] flex items-center justify-center">
+                  <i data-lucide="leaf" className="w-5 h-5 text-eco-green-bright"></i>
+                </div>
+              </div>
+              <div>
+                <span className="font-extrabold text-2xl tracking-tight text-white">
+                  EcoMind <span className="text-gradient-green">AI</span>
+                </span>
+                <p className="text-[10px] text-gray-400 font-mono hidden sm:block">Intelligent Waste Management System</p>
+              </div>
+            </div>
+
+            <nav className="hidden md:flex items-center gap-1 bg-eco-card/80 p-1.5 rounded-2xl border border-eco-border">
+              {navItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => { setActivePage(item.id); window.scrollTo(0,0); }}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    activePage === item.id 
+                      ? 'bg-eco-green/20 text-white font-bold border border-eco-green/40 shadow-glow-green' 
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <i data-lucide={item.icon} className={`w-4 h-4 ${activePage === item.id ? 'text-eco-green-bright' : ''}`}></i>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-eco-card border border-eco-border text-xs font-mono">
+              <span className="w-2.5 h-2.5 rounded-full bg-eco-green-bright animate-ping"></span>
+              <span className="text-gray-300">AI Vision: <span className="text-eco-green-bright font-bold">ONLINE</span></span>
+            </div>
+
+            <button 
+              onClick={() => setMobileOpen(!mobileOpen)} 
+              className="md:hidden p-2 rounded-xl bg-eco-card border border-eco-border text-gray-300"
+            >
+              <i data-lucide={mobileOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
+            </button>
+
+          </div>
+
+          {mobileOpen && (
+            <div className="md:hidden glass-panel p-4 border-b border-eco-border space-y-2">
+              {navItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => { setActivePage(item.id); setMobileOpen(false); window.scrollTo(0,0); }}
+                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 ${
+                    activePage === item.id ? 'bg-eco-green/20 text-white font-bold border border-eco-green/40' : 'text-gray-400'
+                  }`}
+                >
+                  <i data-lucide={item.icon} className="w-4 h-4"></i>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </header>
+      );
+    }
+
+    // --- HOME PAGE ---
+    function HomePage({ setActivePage }) {
+      return (
+        <div className="space-y-20 py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            <div className="space-y-8 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-eco-green/10 border border-eco-green/30 text-eco-green-bright text-xs font-mono font-bold uppercase tracking-wider">
+                <i data-lucide="sparkles" className="w-3.5 h-3.5"></i>
+                NVIDIA Edge AI Platform
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+                EcoMind AI – Intelligent Waste Management System
+              </h1>
+
+              <p className="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl">
+                AI-powered waste classification, smart compost management, and sustainable recycling.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start">
+                <button
+                  onClick={() => { setActivePage('detection'); window.scrollTo(0,0); }}
+                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-eco-green to-eco-cyan text-gray-950 font-extrabold text-base flex items-center justify-center gap-3 shadow-glow-green hover:scale-[1.02] transition-all"
+                >
+                  <i data-lucide="cpu" className="w-5 h-5"></i>
+                  Get Started
+                </button>
+
+                <button
+                  onClick={() => { setActivePage('dashboard'); window.scrollTo(0,0); }}
+                  className="px-8 py-4 rounded-2xl glass-panel text-white font-semibold text-base flex items-center justify-center gap-2 border border-eco-border hover:bg-white/10 transition-all"
+                >
+                  <i data-lucide="bar-chart-2" className="w-5 h-5 text-eco-cyan"></i>
+                  Explore Dashboard
+                </button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 border-t border-eco-border pt-4 font-mono">
+                <div>
+                  <div className="text-2xl font-bold text-white">1,482 kg</div>
+                  <div className="text-xs text-gray-400">Total Processed</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-eco-green-bright">99.4%</div>
+                  <div className="text-xs text-gray-400">AI Accuracy</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-eco-cyan">1.84 T</div>
+                  <div className="text-xs text-gray-400">CO₂ Offset</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3D Smart Waste Bin Diagram */}
+            <div className="glass-panel-glow p-6 rounded-3xl border border-eco-green/30 flex flex-col items-center shadow-glow-green">
+              <div className="w-full flex items-center justify-between border-b border-eco-border pb-3 mb-4 font-mono text-xs text-eco-green-bright">
+                <span>AI SMART BIN V4.2</span>
+                <span className="px-2 py-0.5 rounded bg-eco-green/20 text-eco-green-bright font-bold">OPTICAL SENSOR READY</span>
+              </div>
+
+              <div className="w-64 h-72 bg-gray-950 rounded-2xl border border-eco-border p-4 flex flex-col justify-between relative overflow-hidden">
+                <div className="w-full h-8 bg-gray-900 rounded-xl border border-eco-cyan/40 relative overflow-hidden flex items-center justify-center font-mono text-[10px] text-eco-cyan font-bold">
+                  <div className="animate-scan inset-x-0 h-1 bg-eco-cyan-bright"></div>
+                  OPTICAL SPECTROMETER ACTIVE
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 my-2">
+                  <div className="p-3 rounded-xl bg-eco-green/20 border border-eco-green text-center">
+                    <span className="text-xs font-mono font-bold text-eco-green-bright block">COMPOST</span>
+                    <span className="text-[9px] text-gray-400">Bio-Chamber</span>
+                    <div className="w-full h-1.5 bg-gray-900 rounded-full mt-2 overflow-hidden">
+                      <div className="h-full bg-eco-green w-[42%]"></div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-eco-red/20 border border-eco-red text-center">
+                    <span className="text-xs font-mono font-bold text-eco-red block">REJECT</span>
+                    <span className="text-[9px] text-gray-400">Recycle Vault</span>
+                    <div className="w-full h-1.5 bg-gray-900 rounded-full mt-2 overflow-hidden">
+                      <div className="h-full bg-eco-red w-[68%]"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900/90 rounded-xl p-2 font-mono text-[11px] flex justify-between text-gray-300">
+                  <span>TEMP: <strong className="text-eco-amber">54.2°C</strong></span>
+                  <span>PID: <strong className="text-eco-green-bright">AUTO</strong></span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => { setActivePage('detection'); window.scrollTo(0,0); }} 
+                className="w-full mt-4 py-3 rounded-xl bg-eco-green text-gray-950 font-bold text-sm shadow-glow-green"
+              >
+                Test AI Waste Scan Now
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      );
+    }
+
+    // --- AI DETECTION PAGE ---
+    function AIDetectionPage() {
+      const [selectedItem, setSelectedItem] = useState(PRESET_ITEMS[0]);
+      const [isScanning, setIsScanning] = useState(false);
+      const [isSorting, setIsSorting] = useState(false);
+      const [customImage, setCustomImage] = useState(null);
+      const [webcamActive, setWebcamActive] = useState(false);
+      
+      const fileRef = useRef(null);
+
+      const triggerScan = (item) => {
+        setSelectedItem(item);
+        setCustomImage(null);
+        setWebcamActive(false);
+        setIsScanning(true);
+        setIsSorting(false);
+        setTimeout(() => setIsScanning(false), 1400);
+      };
+
+      const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          setCustomImage(url);
+          setWebcamActive(false);
+          const isOrg = Math.random() > 0.4;
+          const custom = {
+            id: 'uploaded-item',
+            name: file.name.split('.')[0] || 'Uploaded Waste Item',
+            icon: isOrg ? '🥬' : '📦',
+            image: url,
+            category: 'Scanned Material',
+            decision: isOrg ? 'Compost' : 'Reject',
+            confidence: Number((96 + Math.random()*3.5).toFixed(1)),
+            reason: isOrg ? 'Organic biodegradable waste.' : 'Non-biodegradable waste material.',
+            disposal: isOrg ? 'Smart Compost Chamber.' : 'Recycling Bin.'
+          };
+          setSelectedItem(custom);
+          setIsScanning(true);
+          setIsSorting(false);
+          setTimeout(() => setIsScanning(false), 1400);
+        }
+      };
+
+      const triggerSort = () => {
+        setIsSorting(true);
+        if (selectedItem.decision === 'Compost' && window.confetti) {
+          confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#00FF9D', '#10B981'] });
+        }
+      };
+
+      const activeImg = customImage || selectedItem.image;
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-extrabold text-white">Realistic AI Waste Detection Engine</h1>
+            <p className="text-gray-400 text-sm">Upload an image, simulate webcam capture, or select sample preset items.</p>
+          </div>
+
+          {/* Presets Bar */}
+          <div className="glass-panel p-4 rounded-2xl border border-eco-border">
+            <span className="text-xs font-mono text-eco-green-bright block mb-2 font-bold uppercase">PRESET SAMPLES:</span>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_ITEMS.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => triggerScan(item)}
+                  className={`px-3 py-2 rounded-xl text-xs font-mono flex items-center gap-2 transition-all ${
+                    selectedItem.id === item.id && !customImage
+                      ? 'bg-eco-green text-gray-950 font-bold shadow-glow-green'
+                      : 'bg-gray-900 text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <span className="text-base">{item.icon}</span>
+                  <span>{item.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            
+            {/* Viewport & Controls */}
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border space-y-4">
+              <div className="flex justify-between items-center text-xs font-mono text-gray-400">
+                <span className="font-bold uppercase">Optical Input Viewport</span>
+                <div className="flex gap-2">
+                  <input type="file" ref={fileRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
+                  <button onClick={() => fileRef.current?.click()} className="px-2.5 py-1 rounded-lg bg-eco-card border border-eco-border text-eco-cyan hover:text-white font-mono text-[11px]">
+                    Upload Image
+                  </button>
+                  <button onClick={() => { setWebcamActive(!webcamActive); triggerScan(selectedItem); }} className="px-2.5 py-1 rounded-lg bg-eco-card border border-eco-border text-eco-green-bright hover:text-white font-mono text-[11px]">
+                    Webcam Capture
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative aspect-video bg-gray-950 rounded-2xl overflow-hidden border border-eco-border flex items-center justify-center">
+                
+                {webcamActive ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-center p-4">
+                    <span className="text-4xl mb-2 animate-bounce">📷</span>
+                    <span className="font-mono text-xs text-eco-cyan font-bold">WEBCAM OPTICAL FEED ACTIVE</span>
+                    <span className="text-[10px] text-gray-400 mt-1">Live Sensor Frame Capture Ready</span>
+                  </div>
+                ) : (
+                  <img src={activeImg} alt={selectedItem.name} className="w-full h-full object-cover" />
+                )}
+
+                {/* Flying waste icon animation */}
+                {isSorting && (
+                  <div className={`absolute z-40 text-5xl ${selectedItem.decision === 'Compost' ? 'animate-fly-compost' : 'animate-fly-reject'}`}>
+                    {selectedItem.icon}
+                  </div>
+                )}
+                
+                {isScanning && (
+                  <div className="absolute inset-0 bg-eco-bg/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 border-2 border-eco-cyan">
+                    <div className="animate-scan inset-x-0 h-1 bg-eco-cyan-bright shadow-glow-cyan"></div>
+                    <span className="font-mono text-xs text-eco-cyan-bright font-bold animate-pulse">NEURAL INFERENCE SCANNING...</span>
+                  </div>
+                )}
+
+                {!isScanning && (
+                  <div className="absolute top-4 left-4 bg-eco-card/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-eco-green/40 font-mono text-xs shadow-lg flex items-center gap-2">
+                    <span className="text-xl">{selectedItem.icon}</span>
+                    <div>
+                      <span className="font-bold text-white block">{selectedItem.name}</span>
+                      <span className="text-eco-green-bright text-[10px]">{selectedItem.confidence}% Confidence</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                onClick={() => triggerScan(selectedItem)}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-eco-green to-eco-cyan text-gray-950 font-bold text-sm shadow-glow-green"
+              >
+                Re-Scan Waste Item
+              </button>
+            </div>
+
+            {/* Detailed AI Report */}
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border space-y-5">
+              <h3 className="font-mono text-xs text-eco-green-bright font-bold uppercase tracking-wider">AI Classification Report</h3>
+
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-950 border border-eco-border">
+                <span className="text-4xl">{selectedItem.icon}</span>
+                <div>
+                  <h4 className="text-xl font-bold text-white">{selectedItem.name}</h4>
+                  <span className="text-xs font-mono text-eco-cyan">{selectedItem.category}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 font-mono text-xs">
+                <div className="p-3.5 rounded-xl bg-eco-card border border-eco-border">
+                  <span className="text-gray-400 block mb-1">Confidence Score</span>
+                  <span className="text-lg font-bold text-eco-green-bright">{selectedItem.confidence}%</span>
+                </div>
+
+                <div className={`p-3.5 rounded-xl border ${selectedItem.decision === 'Compost' ? 'bg-eco-green/10 border-eco-green/40 text-eco-green-bright' : 'bg-eco-red/10 border-eco-red/40 text-eco-red'}`}>
+                  <span className="text-gray-400 block mb-1">Waste Category</span>
+                  <span className="text-lg font-bold uppercase">{selectedItem.decision}</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-gray-950 border border-eco-border space-y-1">
+                <span className="text-xs font-mono text-eco-cyan font-semibold block uppercase">Reason:</span>
+                <p className="text-sm text-gray-300">{selectedItem.reason}</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-gray-950 border border-eco-border space-y-1">
+                <span className="text-xs font-mono text-eco-green-bright font-semibold block uppercase">Suggested Disposal:</span>
+                <p className="text-sm text-gray-300">{selectedItem.disposal}</p>
+              </div>
+
+              <button
+                onClick={triggerSort}
+                className={`w-full py-3.5 rounded-xl font-bold text-sm ${
+                  selectedItem.decision === 'Compost'
+                    ? 'bg-eco-green text-gray-950 shadow-glow-green'
+                    : 'bg-eco-red text-white shadow-glow-red'
+                }`}
+              >
+                Route Item to {selectedItem.decision} Bin
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* Bins Section */}
+          <div className="glass-panel p-6 rounded-3xl border border-eco-border text-center space-y-6">
+            <h3 className="font-mono text-xs uppercase tracking-widest text-gray-400 font-bold">Target Waste Chambers</h3>
+
+            <div className="grid grid-cols-2 gap-8">
+              {/* Compost Bin */}
+              <div className={`p-6 rounded-2xl border text-center transition-all ${
+                selectedItem.decision === 'Compost' 
+                  ? 'glass-panel-glow border-eco-green text-eco-green-bright shadow-glow-green scale-105' 
+                  : 'bg-gray-900/40 border-eco-border opacity-50'
+              }`}>
+                <span className="px-3 py-0.5 rounded-full bg-eco-green text-gray-950 font-mono text-[10px] font-bold uppercase">
+                  COMPOST BIN
+                </span>
+                <div className="w-16 h-16 rounded-2xl bg-eco-green/20 flex items-center justify-center mx-auto my-4 text-3xl">🌱</div>
+                <span className="font-bold text-lg text-white block">Organic Bio-Chamber</span>
+              </div>
+
+              {/* Reject Bin */}
+              <div className={`p-6 rounded-2xl border text-center transition-all ${
+                selectedItem.decision === 'Reject' 
+                  ? 'glass-panel-glow-red border-eco-red text-eco-red shadow-glow-red scale-105' 
+                  : 'bg-gray-900/40 border-eco-border opacity-50'
+              }`}>
+                <span className="px-3 py-0.5 rounded-full bg-eco-red text-white font-mono text-[10px] font-bold uppercase">
+                  REJECT BIN
+                </span>
+                <div className="w-16 h-16 rounded-2xl bg-eco-red/20 flex items-center justify-center mx-auto my-4 text-3xl">🛑</div>
+                <span className="font-bold text-lg text-white block">Recycling Vault</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      );
+    }
+
+    // --- SMART COMPOST CONTROL PAGE ---
+    function SmartCompostControlPage() {
+      const [activeMode, setActiveMode] = useState('compost');
+      const [chamberStatus, setChamberStatus] = useState('busy'); // 'busy' | 'available'
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-extrabold text-white">Smart Compost Control Screen</h1>
+            <p className="text-gray-400 text-sm">Select chamber operating mode & monitor status telemetry.</p>
+          </div>
+
+          {/* Dev Status Simulator Switch */}
+          <div className="flex items-center justify-between bg-eco-card p-3 rounded-2xl border border-eco-border font-mono text-xs">
+            <span className="text-gray-300">Bio-Chamber Telemetry Simulator:</span>
+            <button
+              onClick={() => setChamberStatus(chamberStatus === 'busy' ? 'available' : 'busy')}
+              className={`px-3 py-1.5 rounded-xl font-bold uppercase transition-all ${
+                chamberStatus === 'busy' 
+                  ? 'bg-eco-amber/20 text-eco-amber border border-eco-amber/40' 
+                  : 'bg-eco-green/20 text-eco-green-bright border border-eco-green/40'
+              }`}
+            >
+              Toggle State: {chamberStatus.toUpperCase()}
+            </button>
+          </div>
+
+          {/* 3 Modes */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button
+              onClick={() => setActiveMode('compost')}
+              className={`p-6 rounded-3xl border text-left transition-all ${
+                activeMode === 'compost' 
+                  ? 'glass-panel-glow border-eco-green shadow-glow-green scale-105' 
+                  : 'glass-panel border-eco-border opacity-70'
+              }`}
+            >
+              <h3 className="text-lg font-bold text-white">1. Compost Waste</h3>
+              <p className="text-xs text-gray-400 mt-1">Routes organic waste to thermophilic bio-chamber</p>
+            </button>
+
+            <button
+              onClick={() => setActiveMode('reject')}
+              className={`p-6 rounded-3xl border text-left transition-all ${
+                activeMode === 'reject' 
+                  ? 'glass-panel-glow-red border-eco-red shadow-glow-red scale-105' 
+                  : 'glass-panel border-eco-border opacity-70'
+              }`}
+            >
+              <h3 className="text-lg font-bold text-white">2. Reject Waste</h3>
+              <p className="text-xs text-gray-400 mt-1">Opens non-biodegradable recycling vault</p>
+            </button>
+
+            <button
+              onClick={() => setActiveMode('auto')}
+              className={`p-6 rounded-3xl border text-left transition-all ${
+                activeMode === 'auto' 
+                  ? 'glass-panel-glow border-eco-cyan shadow-glow-cyan scale-105' 
+                  : 'glass-panel border-eco-border opacity-70'
+              }`}
+            >
+              <h3 className="text-lg font-bold text-white">3. Auto AI Detect</h3>
+              <p className="text-xs text-gray-400 mt-1">Autonomous optical sensor & solenoid routing</p>
+            </button>
+          </div>
+
+          {/* Display Output Box (Exact text format matching requirements) */}
+          <div className="glass-panel p-8 rounded-3xl border border-eco-border max-w-xl mx-auto font-mono text-center space-y-6">
+            
+            {activeMode === 'compost' && chamberStatus === 'busy' && (
+              <div className="bg-eco-amber/10 border-2 border-eco-amber/40 p-6 rounded-2xl text-left space-y-4 shadow-glow-amber">
+                <div className="border-b border-eco-amber/30 pb-3">
+                  <h3 className="text-xl font-bold text-eco-amber uppercase">Compost Chamber Busy</h3>
+                </div>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="text-gray-400 text-xs block uppercase">Current Process:</span>
+                    <strong className="text-white text-base">Composting</strong>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-xs block uppercase">Estimated Time Remaining:</span>
+                    <strong className="text-eco-amber text-lg">5 Days</strong>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-xs block uppercase">Door Status:</span>
+                    <strong className="text-eco-red text-base uppercase">Locked</strong>
+                  </div>
+                </div>
+                <div className="pt-2 text-center text-xs text-eco-amber font-bold animate-pulse border-t border-eco-amber/20">
+                  Please Wait
+                </div>
+              </div>
+            )}
+
+            {activeMode === 'compost' && chamberStatus === 'available' && (
+              <div className="bg-eco-green/10 border-2 border-eco-green/50 p-6 rounded-2xl text-left space-y-4 shadow-glow-green">
+                <div className="border-b border-eco-green/30 pb-3">
+                  <h3 className="text-xl font-bold text-eco-green-bright uppercase">Compost Chamber Ready</h3>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="text-gray-400 text-xs block uppercase">Door Status:</span>
+                    <strong className="text-eco-green-bright text-lg animate-pulse">Opening...</strong>
+                  </div>
+                </div>
+                <div className="pt-3 text-center text-sm text-white font-bold border-t border-eco-green/30">
+                  Please insert organic waste.
+                </div>
+              </div>
+            )}
+
+            {activeMode === 'reject' && (
+              <div className="bg-eco-red/10 border-2 border-eco-red/50 p-6 rounded-2xl text-left space-y-4 shadow-glow-red">
+                <div className="border-b border-eco-red/30 pb-3">
+                  <h3 className="text-xl font-bold text-eco-red uppercase">Reject Bin Door Opened</h3>
+                </div>
+                <p className="text-sm text-gray-300">Door opens immediately for non-biodegradable and recyclable items.</p>
+              </div>
+            )}
+
+            {activeMode === 'auto' && (
+              <div className="bg-eco-cyan/10 border-2 border-eco-cyan/50 p-6 rounded-2xl text-left space-y-4 shadow-glow-cyan">
+                <div className="border-b border-eco-cyan/30 pb-3">
+                  <h3 className="text-xl font-bold text-eco-cyan-bright uppercase">Auto AI Mode</h3>
+                </div>
+                <p className="text-sm text-gray-300">AI automatically detects the object upon optical placement and triggers solenoid doors.</p>
+              </div>
+            )}
+
+          </div>
+
+        </div>
+      );
+    }
+
+    // --- DASHBOARD PAGE ---
+    function DashboardPage() {
+      const lineChartRef = useRef(null);
+      const pieChartRef = useRef(null);
+      const barChartRef = useRef(null);
+
+      useEffect(() => {
+        if (lineChartRef.current) {
+          new Chart(lineChartRef.current, {
+            type: 'line',
+            data: {
+              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              datasets: [
+                { label: 'Organic Waste (kg)', data: [120, 145, 132, 160, 175, 210, 190], borderColor: '#10B981', tension: 0.4 },
+                { label: 'Rejected Waste (kg)', data: [85, 92, 78, 110, 95, 130, 115], borderColor: '#EF4444', tension: 0.4 }
+              ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+          });
+        }
+
+        if (pieChartRef.current) {
+          new Chart(pieChartRef.current, {
+            type: 'pie',
+            data: {
+              labels: ['Organic', 'Plastics', 'Paper', 'Metals', 'E-Waste'],
+              datasets: [{ data: [61.5, 18.2, 11.4, 6.1, 2.8], backgroundColor: ['#10B981', '#06B6D4', '#3B82F6', '#F59E0B', '#EF4444'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+          });
+        }
+
+        if (barChartRef.current) {
+          new Chart(barChartRef.current, {
+            type: 'bar',
+            data: {
+              labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+              datasets: [{ label: 'Compost Production (kg)', data: [95, 112, 104, 117], backgroundColor: '#00FF9D' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+          });
+        }
+      }, []);
+
+      const logs = [
+        { id: 'LOG-8849', item: 'Banana Peel', category: 'Organic', decision: 'Compost', confidence: '99.2%', timestamp: '10 mins ago' },
+        { id: 'LOG-8848', item: 'PET Bottle 500ml', category: 'Plastic', decision: 'Reject', confidence: '99.5%', timestamp: '24 mins ago' },
+        { id: 'LOG-8847', item: 'Hardcover Book', category: 'Paper', decision: 'Reject', confidence: '98.7%', timestamp: '45 mins ago' },
+        { id: 'LOG-8846', item: 'Coffee Grounds', category: 'Organic', decision: 'Compost', confidence: '97.8%', timestamp: '1 hour ago' },
+        { id: 'LOG-8845', item: 'Aluminum Soda Can', category: 'Metal', decision: 'Reject', confidence: '99.1%', timestamp: '2 hours ago' },
+      ];
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <h1 className="text-3xl font-extrabold text-white">System Analytics & Metrics Dashboard</h1>
+
+          {/* 9 KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-mono">
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">Total Waste Processed</span>
+              <div className="text-3xl font-bold text-white mt-1">1,482 kg</div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">Organic Waste</span>
+              <div className="text-3xl font-bold text-eco-green-bright mt-1">912 kg</div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">Rejected Waste</span>
+              <div className="text-3xl font-bold text-eco-red mt-1">570 kg</div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">Estimated Compost Produced</span>
+              <div className="text-3xl font-bold text-eco-green-bright mt-1">428 kg</div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">CO₂ Emission Saved</span>
+              <div className="text-3xl font-bold text-eco-cyan mt-1">1.84 Tons</div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">Current Compost Temp</span>
+              <div className="text-3xl font-bold text-eco-amber mt-1">54.2 °C</div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">Humidity</span>
+              <div className="text-3xl font-bold text-eco-blue mt-1">64.5 %</div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border space-y-2">
+              <span className="text-xs text-gray-400 uppercase block">Bin Fill Level</span>
+              <div className="text-xs text-gray-300">Compost: <strong className="text-eco-green-bright">42%</strong> | Reject: <strong className="text-eco-red">68%</strong></div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <span className="text-xs text-gray-400 uppercase">AI Accuracy</span>
+              <div className="text-3xl font-bold text-eco-green-bright mt-1">99.4 %</div>
+            </div>
+          </div>
+
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-eco-border">
+              <h3 className="text-xs font-mono uppercase text-white font-bold mb-4">Daily Waste Dynamics (Line Chart)</h3>
+              <div className="h-64"><canvas ref={lineChartRef}></canvas></div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+              <h3 className="text-xs font-mono uppercase text-white font-bold mb-4">Waste Distribution (Pie Chart)</h3>
+              <div className="h-64"><canvas ref={pieChartRef}></canvas></div>
+            </div>
+          </div>
+
+          <div className="glass-panel p-6 rounded-3xl border border-eco-border">
+            <h3 className="text-xs font-mono uppercase text-white font-bold mb-4">Compost Production Yield (Bar Chart)</h3>
+            <div className="h-64"><canvas ref={barChartRef}></canvas></div>
+          </div>
+
+          {/* Recent Detection History Table */}
+          <div className="glass-panel p-6 rounded-3xl border border-eco-border space-y-4">
+            <h3 className="text-xs font-mono uppercase text-white font-bold">Recent Detection History</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left font-mono text-xs">
+                <thead>
+                  <tr className="border-b border-eco-border text-gray-400 uppercase">
+                    <th className="pb-3">Log ID</th>
+                    <th className="pb-3">Detected Item</th>
+                    <th className="pb-3">Category</th>
+                    <th className="pb-3">Decision</th>
+                    <th className="pb-3">Confidence</th>
+                    <th className="pb-3">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-eco-border/50 text-gray-300">
+                  {logs.map(log => (
+                    <tr key={log.id}>
+                      <td className="py-3 text-eco-cyan font-bold">{log.id}</td>
+                      <td className="py-3 text-white font-sans">{log.item}</td>
+                      <td className="py-3 text-gray-400">{log.category}</td>
+                      <td className="py-3">
+                        <span className={`px-2 py-0.5 rounded font-bold ${log.decision === 'Compost' ? 'bg-eco-green/20 text-eco-green-bright' : 'bg-eco-red/20 text-eco-red'}`}>
+                          {log.decision}
+                        </span>
+                      </td>
+                      <td className="py-3 text-eco-green-bright font-bold">{log.confidence}</td>
+                      <td className="py-3 text-gray-400">{log.timestamp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      );
+    }
+
+    // --- ABOUT PAGE ---
+    function AboutPage() {
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-extrabold text-white">About EcoMind AI Project</h1>
+            <p className="text-gray-300 text-sm max-w-xl mx-auto">AI-powered waste classification and rapid bio-composting solution.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="glass-panel p-6 rounded-3xl border border-eco-border space-y-3">
+              <span className="text-eco-red font-mono text-xs font-bold uppercase">Problem</span>
+              <h3 className="text-xl font-bold text-white">Current Waste Issues</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">Over 25% of recyclables are contaminated in municipal waste streams. Organic waste trapped in landfills releases methane gas.</p>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-green/30 space-y-3">
+              <span className="text-eco-green-bright font-mono text-xs font-bold uppercase">Solution</span>
+              <h3 className="text-xl font-bold text-white">EcoMind AI Smart System</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">Real-time computer vision classification routes compostable organic matter to bio-reactors and rejects non-biodegradable plastics.</p>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-cyan/30 space-y-3">
+              <span className="text-eco-cyan font-mono text-xs font-bold uppercase">AI Technologies</span>
+              <h3 className="text-xl font-bold text-white">AI Technologies Used</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">YOLOv8 Edge Computer Vision models combined with multi-spectral spectrographs for sub-15ms optical classification.</p>
+            </div>
+
+            <div className="glass-panel p-6 rounded-3xl border border-eco-blue/30 space-y-3">
+              <span className="text-eco-blue font-mono text-xs font-bold uppercase">Future Scope</span>
+              <h3 className="text-xl font-bold text-white">Future Scope & Vision</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">Interconnecting municipal waste bins via LoRaWAN mesh networks and equipping bio-reactors with methane micro-capture generators.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- CONTACT PAGE ---
+    function ContactPage() {
+      const [submitted, setSubmitted] = useState(false);
+
+      return (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-extrabold text-white">Contact EcoMind AI Team</h1>
+            <p className="text-gray-400 text-sm">Submit your inquiry for municipal or enterprise deployments.</p>
+          </div>
+
+          <div className="glass-panel p-8 rounded-3xl border border-eco-border">
+            {submitted ? (
+              <div className="text-center py-8 space-y-3">
+                <span className="text-4xl">✅</span>
+                <h3 className="text-xl font-bold text-white">Message Submitted Successfully!</h3>
+                <p className="text-sm text-gray-400">Our engineering team will get back to you within 24 hours.</p>
+              </div>
+            ) : (
+              <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono text-gray-300 uppercase mb-1">Full Name</label>
+                  <input required type="text" placeholder="Dr. Alex Vance" className="w-full px-4 py-3 rounded-xl bg-gray-950 border border-eco-border text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-gray-300 uppercase mb-1">Email Address</label>
+                  <input required type="email" placeholder="alex@sustainability.org" className="w-full px-4 py-3 rounded-xl bg-gray-950 border border-eco-border text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-gray-300 uppercase mb-1">Message</label>
+                  <textarea required rows="4" placeholder="Your inquiry details..." className="w-full px-4 py-3 rounded-xl bg-gray-950 border border-eco-border text-white text-sm"></textarea>
+                </div>
+                <button type="submit" className="w-full py-4 rounded-xl bg-eco-green text-gray-950 font-bold text-sm shadow-glow-green">
+                  Submit Inquiry
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // --- MAIN APP ---
+    function App() {
+      const [activePage, setActivePage] = useState('home');
+
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      }, [activePage]);
+
+      const renderPage = () => {
+        switch(activePage) {
+          case 'home': return <HomePage setActivePage={setActivePage} />;
+          case 'detection': return <AIDetectionPage />;
+          case 'control': return <SmartCompostControlPage />;
+          case 'dashboard': return <DashboardPage />;
+          case 'about': return <AboutPage />;
+          case 'contact': return <ContactPage />;
+          default: return <HomePage setActivePage={setActivePage} />;
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col justify-between cyber-grid">
+          <Navbar activePage={activePage} setActivePage={setActivePage} />
+          <main className="flex-grow">{renderPage()}</main>
+          <footer className="border-t border-eco-border py-6 text-center text-xs font-mono text-gray-500">
+            © 2026 EcoMind AI Inc. Powered by NVIDIA AI Edge Architecture.
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+
+</body>
+</html>
